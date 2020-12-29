@@ -1,5 +1,7 @@
 # multissh
-A simple TUI utility to manage multiple terminals at once with synchronization
+A simple TUI utility to manage multiple terminals at once with synchronization.
+
+I end up doing a lot of tasks spread upon multiple servers using scp/ssh, this utility was designed to make the ssh portion of my bulk actions faster with less clutter.
 <div align="center">  
  
 <img src="https://github.com/thenick775/multissh/blob/main/graphics/demo.gif" width="70%" >
