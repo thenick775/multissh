@@ -1,0 +1,2 @@
+/Users/youruser/<some pem file 1>.pem <some ip or domain address 1> <some user 1>
+/Users/youruser/<some pem file 2>.pem <some ip or domain address 2> <some user 2>
