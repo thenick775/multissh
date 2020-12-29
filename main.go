@@ -8,8 +8,10 @@
 //format: <pem file location> <domain location> <username>
 //
 //TUI Commands:
-//-Use F1 to toggle terminal synchronization,
-//-Use trigger `loadCommand(<filename>)` to load a command from a file
+//-Use tab to cycle between connection views
+//-Use F1 to toggle sync (commands running on all or only current terminal)
+//-Use 'loadCommand(<filename>)' to load a command from a file
+//-Use Esc to quit and disconnect
 package main
 
 import (
@@ -64,13 +66,14 @@ func loginSetup(fileloc string) {
 			log.Fatalf("dial failed:%v", err)
 		}
 		cons = append(cons, conn)
-		prefix=append(prefix,line[2]+"@"+line[1]+" ~ % ")
+		prefix = append(prefix, line[2]+"@"+line[1]+" ~ % ")
 		v := tui.NewHBox(tui.NewLabel("Logged in for server " + strconv.Itoa(count)))
 		views = append(views, v)
 		count += 1
 	}
 
-	helpview = tui.NewHBox(tui.NewLabel(`Use F1 to toggle sync (commands running on all or only current terminal)
+	helpview = tui.NewHBox(tui.NewLabel(`Use tab to cycle between connection views
+	Use F1 to toggle sync (commands running on all or only current terminal)
 	Use 'loadCommand(<filename>)' to load a command from a file
 	Use Esc to quit and disconnect`))
 
