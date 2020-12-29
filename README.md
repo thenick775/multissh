@@ -1,7 +1,10 @@
 # multissh
 A simple TUI utility to manage multiple terminals at once with synchronization
+<div align="center">  
+ 
+<img src="https://github.com/thenick775/multissh/blob/main/graphics/demo.gif" width="70%" >
 
-![](https://github.com/thenick775/multissh/graphics/demo.gif)
+</div>
 
 ### Run Instructions
 Put your pem file locations, server addresses, and usernames in the `serverloc.txt` file (or any other file) and then run
