@@ -31,6 +31,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 var cons []*ssh.Client
@@ -119,6 +120,27 @@ func cycle(viewnum int, max int) int {
 	return res
 }
 
+func threadFunc(i int, currentview int, inputtxt string, root *tui.Box, chat *tui.Box, wg *sync.WaitGroup) {
+	defer wg.Done()
+	var stdoutBuf bytes.Buffer
+	sess, err := cons[i].NewSession()
+	defer sess.Close()
+	if err != nil {
+		closeAll()
+		log.Fatalf("session failed:%v", err)
+	}
+	sess.Stdout = &stdoutBuf
+	err = sess.Run(inputtxt + " 2>&1")
+	if err != nil {
+		stdoutBuf.WriteString(err.Error())
+	}
+	t := views[i]
+	views[i] = tui.NewVBox(t, tui.NewHBox(tui.NewPadder(0, 0, tui.NewVBox(tui.NewLabel(wordwrap.WrapString(prefix[i]+inputtxt+"\n"+stdoutBuf.String(), chat.Size().X-5)), tui.NewLabel("")))))
+	if i == currentview {
+		root.Append(views[currentview])
+	}
+}
+
 func main() {
 	argswithoutprog, synced := os.Args[1:], true
 
@@ -161,30 +183,16 @@ func main() {
 				return
 			}
 		}
-		input.SetText("Commands Running, please wait")
 		if inputtxt == "help" {
 			currentview--
-			root.Remove(0)
 			root.Append(helpview)
 		} else if synced {
+			var wg sync.WaitGroup
 			for i, _ := range cons {
-				var stdoutBuf bytes.Buffer
-				sess, err := cons[i].NewSession()
-				defer sess.Close()
-				if err != nil {
-					log.Fatalf("session failed:%v", err)
-				}
-				sess.Stdout = &stdoutBuf
-				err = sess.Run(inputtxt + " 2>&1")
-				if err != nil {
-					stdoutBuf.WriteString(err.Error())
-				}
-				t := views[i]
-				views[i] = tui.NewVBox(t, tui.NewHBox(tui.NewPadder(0, 0, tui.NewVBox(tui.NewLabel(wordwrap.WrapString(prefix[i]+inputtxt+"\n"+stdoutBuf.String(), chat.Size().X-5)), tui.NewLabel("")))))
-				if i == currentview {
-					root.Append(views[currentview])
-				}
+				wg.Add(1)
+				go threadFunc(i, currentview, inputtxt, root, chat, &wg)
 			}
+			wg.Wait()
 		} else {
 			var stdoutBuf bytes.Buffer
 			sess, err := cons[currentview].NewSession()
@@ -216,7 +224,7 @@ func main() {
 	})
 	ui.SetKeybinding("Ctrl+b", func() {
 		rootScroll.SetAutoscrollToBottom(true)
-	}) 
+	})
 	ui.SetKeybinding("Ctrl+t", func() {
 		rootScroll.SetAutoscrollToBottom(false)
 		rootScroll.ScrollToTop()
@@ -224,7 +232,7 @@ func main() {
 	ui.SetKeybinding("Up", func() {
 		rootScroll.SetAutoscrollToBottom(false)
 		rootScroll.Scroll(0, -5)
-	}) 
+	})
 	ui.SetKeybinding("Down", func() {
 		rootScroll.SetAutoscrollToBottom(false)
 		rootScroll.Scroll(0, 5)
