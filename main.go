@@ -9,8 +9,11 @@
 //
 //TUI Commands:
 //-Use tab to cycle between connection views
-//-Use F1 to toggle sync (commands running on all or only current terminal)
 //-Use 'loadCommand(<filename>)' to load a command from a file
+//-Use Ctrl+s to toggle sync (commands running on all or only current terminal)
+//-Use Ctrl+t to quick scroll to the top
+//-Use Ctrl+b to quick scroll to the bottom
+//-Use up and down arrow keys to scroll
 //-Use Esc to quit and disconnect
 package main
 
@@ -73,9 +76,13 @@ func loginSetup(fileloc string) {
 	}
 
 	helpview = tui.NewHBox(tui.NewLabel(`Use tab to cycle between connection views
-	Use F1 to toggle sync (commands running on all or only current terminal)
 	Use 'loadCommand(<filename>)' to load a command from a file
-	Use Esc to quit and disconnect`))
+	Use Ctrl+s to toggle sync (commands running on all or only current terminal)
+	Use Ctrl+t to quick scroll to the top
+	Use Ctrl+b to quick scroll to the bottom
+	Use up and down arrow keys to scroll
+	Use Esc to quit and disconnect
+	Press tab to exit help view`))
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
@@ -154,6 +161,7 @@ func main() {
 				return
 			}
 		}
+		input.SetText("Commands Running, please wait")
 		if inputtxt == "help" {
 			currentview--
 			root.Remove(0)
@@ -199,12 +207,27 @@ func main() {
 		root.Remove(0)
 		root.Append(views[currentview])
 	})
-	ui.SetKeybinding("F1", func() {
+	ui.SetKeybinding("Ctrl+s", func() {
 		synced = !synced
 		root.Remove(0)
 		t := views[currentview]
 		views[currentview] = tui.NewVBox(t, tui.NewHBox(tui.NewPadder(0, 0, tui.NewVBox(tui.NewLabel(wordwrap.WrapString(fmt.Sprintf("switching synchronization to: %t", synced), chat.Size().X-5)), tui.NewLabel("")))))
 		root.Append(views[currentview])
+	})
+	ui.SetKeybinding("Ctrl+b", func() {
+		rootScroll.SetAutoscrollToBottom(true)
+	}) 
+	ui.SetKeybinding("Ctrl+t", func() {
+		rootScroll.SetAutoscrollToBottom(false)
+		rootScroll.ScrollToTop()
+	})
+	ui.SetKeybinding("Up", func() {
+		rootScroll.SetAutoscrollToBottom(false)
+		rootScroll.Scroll(0, -5)
+	}) 
+	ui.SetKeybinding("Down", func() {
+		rootScroll.SetAutoscrollToBottom(false)
+		rootScroll.Scroll(0, 5)
 	})
 
 	if err := ui.Run(); err != nil {
