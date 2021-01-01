@@ -16,7 +16,7 @@ go run main.go serverloc.txt
 
 ### Usage
  - Use Ctrl+s to toggle synchronization of the multiple connections, meaning whether commands execute on all connectiosn or only the one currently selected
- - Use the 'loadCommand(<filename>)' trigger to load a command from a file (done as copy/paste is non functional in the go-tui input). Absolute or local path, no quotes
+ - Use the 'loadCommand(<filename>)' trigger to load a command from a file (done as copy/paste is non functional in the go-tui input). Absolute or relative path, no quotes
  - Use Ctrl+t to quick scroll to the top
  - Use Ctrl+b to quick scroll to the bottom
  - Use up and down arrow keys to scroll
